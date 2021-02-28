@@ -83,7 +83,7 @@ void host::serve(
 
 			unsigned int hash =0;
 			for(int i=filepath.size()-1;i&&filepath[i]!='.';i--) {
-				hash += hash*7+filepath[i];
+				hash = hash*7+filepath[i];
 			}
 			res_h["Content-type"] = getcontent_type(hash);
 			if(filecaches_.get(filepath) != filecaches_.end()) {
