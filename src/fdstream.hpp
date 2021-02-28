@@ -95,11 +95,9 @@ protected:
 		return c;
 	}
 	virtual std::streamsize xsputn(const char *s, std::streamsize num){
-/*
 #ifdef DEBUG
 		std::cerr<<"write "<<num<<" bytes to "<<"fd : "<<fd_<<'\n';
 #endif
-*/
 		return write(fd_,s,num);
 	}
 };

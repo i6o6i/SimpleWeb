@@ -32,15 +32,19 @@ void file::openfile(const char* path, std::ios_base::openmode m) {
 
 	fd_ = open(path,flag);
 #ifdef DEBUG
-	//std::cerr<<"open file: "<<path<<" fd:"<<fd_<<std::endl;
+	std::cerr<<"open file: "<<path<<" fd:"<<fd_<<std::endl;
 #endif
 	if( fd_ < 0 ) {
-		//std::cerr<<::strerror(errno);
+		std::cerr<<::strerror(errno);
 	}
 	struct stat st;
 	::stat(path,&st);
 	fsize = st.st_size;
 	fileaddr_ = (char *)mmap(nullptr, fsize, PROT_READ, MAP_SHARED, fd_, 0);
+	if(fileaddr_ == MAP_FAILED ) {
+		std::cerr <<"mmap\n";
+		std::cerr<<::strerror(errno);
+	}
 }
 
 file::file(const char* fstr, std::ios_base::openmode m){
