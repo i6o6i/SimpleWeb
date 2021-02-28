@@ -15,14 +15,14 @@ namespace simpleweb{
 static const char* getcontent_type(unsigned int hash) {
 	switch(hash) {
 		case 6640: return "text/plain";
-case 42227: return "text/html";
-case 5771: return "text/css";
-case 6564: return "image/svg+xml";
-case 857: return "text/javascript";
-case 6081: return "image/png";
-case 42656: return "image/jpeg";
-case 6031: return "image/gif";
-case 5949: return "image/x-icon";
+		case 43301: return "text/html";
+		case 6539: return "text/css";
+		case 5988: return "image/svg+xml";
+		case 911: return "text/javascript";
+		case 5937: return "image/png";
+		case 41168: return "image/jpeg";
+		case 5839: return "image/gif";
+		case 6237: return "image/x-icon";
 		default: return "text/plain";
 	}
 }
@@ -85,6 +85,9 @@ void host::serve(
 			for(int i=filepath.size()-1;i&&filepath[i]!='.';i--) {
 				hash = hash*7+filepath[i];
 			}
+#ifdef DEBUG
+			std::cerr<<filepath<<"content-type hash"<<hash<<'\n';
+#endif
 			res_h["Content-type"] = getcontent_type(hash);
 			if(filecaches_.get(filepath) != filecaches_.end()) {
 				fileNode &f = *filecaches_.get(filepath);

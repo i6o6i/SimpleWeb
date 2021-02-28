@@ -13,7 +13,7 @@ content_type = {
 print("keyhash for file extension")
 for (key, value) in content_type.items():
     extenhash=0;
-    for char in key:
+    for char in reversed(key):
         extenhash=extenhash*7+ord(char)
     print(f'case {extenhash}: return "{value}";')
 
