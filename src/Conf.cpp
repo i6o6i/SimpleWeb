@@ -83,6 +83,14 @@ int Conf::global_parser(std::istream& is)
 							return -1;
 						}
 					}
+					if( key == "docroot" ) {
+						if( ::access(value.c_str(),R_OK) == 0 )
+							defauthost_.docroot = line.substr(i+1);
+						else {
+							Logger::logfor(Info, ::strerror(errno));
+							return -1;
+						}
+					}
 					break;
 				case 9:
 					if(key == "threadcnt") {

@@ -8,6 +8,9 @@ This is a http server used Reactor pattern and ThreadPool
 1000 concurrent requests with 16M file test  
 ![1M1000](https://raw.githubusercontent.com/i6o6i/SimpleWeb/main/benchmark/16M1000.png)
 
+# Requirement
+`C++11`
+
 # Build
 ```
 cmake . && cmake --build .

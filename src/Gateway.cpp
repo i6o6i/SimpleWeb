@@ -18,6 +18,7 @@ static const char* getcontent_type(unsigned int hash) {
 		case 437: return "text/html";
 		case 329: return "text/javascript";
 		case 221: return "text/css";
+		case 336: return "image/svg+xml";
 		case 321: return "image/jpg";
 		case 422: return "image/jpeg";
 		case 313: return "image/gif";

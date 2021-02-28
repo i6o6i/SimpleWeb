@@ -2,6 +2,7 @@ content_type = {
         "txt":"text/plain",
         "html":"text/html",
         "css": "text/css",
+        "svg": "image/svg+xml",
         "js": "text/javascript",
         "jpg": "image/jpg",
         "jpeg": "image/jpeg",
