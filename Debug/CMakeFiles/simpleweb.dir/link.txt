@@ -1,1 +1,0 @@
-/usr/bin/c++ -g -rdynamic CMakeFiles/simpleweb.dir/src/Conf.cpp.o CMakeFiles/simpleweb.dir/src/SimpleWeb.cpp.o CMakeFiles/simpleweb.dir/src/ThreadPool.cpp.o CMakeFiles/simpleweb.dir/src/gateway.cpp.o CMakeFiles/simpleweb.dir/src/main.cpp.o -o simpleweb  -pthread 

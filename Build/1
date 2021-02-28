@@ -1,3 +1,0 @@
-Read conf file from sw.conf
-terminate called after throwing an instance of 'std::system_error'
-  what():  Address already in use

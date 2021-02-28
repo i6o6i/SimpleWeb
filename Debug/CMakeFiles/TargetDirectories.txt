@@ -1,3 +1,0 @@
-/home/kkk/Documents/cpp/simpleweb/Debug/CMakeFiles/rebuild_cache.dir
-/home/kkk/Documents/cpp/simpleweb/Debug/CMakeFiles/edit_cache.dir
-/home/kkk/Documents/cpp/simpleweb/Debug/CMakeFiles/sw.dir
