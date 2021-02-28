@@ -14,8 +14,8 @@ print("keyhash for file extension")
 for (key, value) in content_type.items():
     extenhash=0;
     for char in key:
-        extenhash+=ord(char);
-    print(f"case {extenhash}: return {value}")
+        extenhash=extenhash*7+ord(char)
+    print(f'case {extenhash}: return "{value}";')
 
 print()
 print("keyhash for sw.conf")

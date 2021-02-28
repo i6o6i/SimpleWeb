@@ -14,16 +14,15 @@ namespace simpleweb{
 
 static const char* getcontent_type(unsigned int hash) {
 	switch(hash) {
-		case 352: return "text/plain";
-		case 437: return "text/html";
-		case 329: return "text/javascript";
-		case 221: return "text/css";
-		case 336: return "image/svg+xml";
-		case 321: return "image/jpg";
-		case 321: return "image/png";
-		case 422: return "image/jpeg";
-		case 313: return "image/gif";
-		case 315: return "image/x-icon";
+		case 6640: return "text/plain";
+case 42227: return "text/html";
+case 5771: return "text/css";
+case 6564: return "image/svg+xml";
+case 857: return "text/javascript";
+case 6081: return "image/png";
+case 42656: return "image/jpeg";
+case 6031: return "image/gif";
+case 5949: return "image/x-icon";
 		default: return "text/plain";
 	}
 }
@@ -84,7 +83,7 @@ void host::serve(
 
 			unsigned int hash =0;
 			for(int i=filepath.size()-1;i&&filepath[i]!='.';i--) {
-				hash += filepath[i];
+				hash += hash*7+filepath[i];
 			}
 			res_h["Content-type"] = getcontent_type(hash);
 			if(filecaches_.get(filepath) != filecaches_.end()) {
