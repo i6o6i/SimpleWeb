@@ -14,15 +14,15 @@ namespace simpleweb{
 
 static const char* getcontent_type(unsigned int hash) {
 	switch(hash) {
-		case 6640: return "text/plain";
-		case 43301: return "text/html";
-		case 6539: return "text/css";
-		case 5988: return "image/svg+xml";
-		case 911: return "text/javascript";
-		case 5937: return "image/png";
-		case 41168: return "image/jpeg";
-		case 5839: return "image/gif";
-		case 6237: return "image/x-icon";
+		case 6640: return "text/plain"; break;
+		case 43301: return "text/html"; break;
+		case 6539: return "text/css"; break;
+		case 5988: return "image/svg+xml"; break;
+		case 911: return "text/javascript"; break;
+		case 5937: return "image/png"; break;
+		case 41168: return "image/jpeg"; break;
+		case 5839: return "image/gif"; break;
+		case 6237: return "image/x-icon"; break;
 		default: return "text/plain";
 	}
 }
