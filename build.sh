@@ -3,7 +3,6 @@
 builddir='Build'
 debugdir='Debug'
 function linkfile {
-    echo $PWD
     echo 'link file'
     [[ -f ../16M.txt ]] && ln -s ../16M.txt
     [[ -f ../index.html ]] && ln -s ../index.html
