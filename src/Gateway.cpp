@@ -89,6 +89,7 @@ void host::serve(
 			std::cerr<<filepath<<"content-type hash"<<hash<<'\n';
 #endif
 			res_h["Content-type"] = getcontent_type(hash);
+			res_h["Connection"] = "keep-alive";
 			if(filecaches_.get(filepath) != filecaches_.end()) {
 				fileNode &f = *filecaches_.get(filepath);
 #ifdef DEBUG
@@ -104,10 +105,10 @@ void host::serve(
 				std::cerr<<"caches missed filename "<<filepath<<'\n';
 #endif
 				response_serializer<file_body> res_ser({std::move(res_h), filepath});
-				response_message<file_body>& res_m = res_ser.get();
 #ifdef DEBUG
 				std::cerr<<"set caches for file "<<filepath<<'\n';
 #endif
+				response_message<file_body>& res_m = res_ser.get();
 				filecaches_.set(filepath,res_m.content().fd());
 				res_m["Content-Length"] = std::to_string(file_body::size(res_m));
 				write(conn,res_ser);
