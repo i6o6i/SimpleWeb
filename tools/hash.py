@@ -5,7 +5,7 @@ content_type = {
         "svg": "image/svg+xml",
         "js": "text/javascript",
         "jpg": "image/jpg",
-        "jpg": "image/png",
+        "png": "image/png",
         "jpeg": "image/jpeg",
         "jif": "image/gif",
         "ico": "image/x-icon"

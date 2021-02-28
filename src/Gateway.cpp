@@ -19,7 +19,7 @@ static const char* getcontent_type(unsigned int hash) {
 		case 6539: return "text/css"; break;
 		case 5988: return "image/svg+xml"; break;
 		case 911: return "text/javascript"; break;
-		case 5937: return "image/png"; break;
+		case 5929: return "image/png"; break;
 		case 41168: return "image/jpeg"; break;
 		case 5839: return "image/gif"; break;
 		case 6237: return "image/x-icon"; break;
