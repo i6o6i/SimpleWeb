@@ -16,10 +16,10 @@ void Logger::log(std::string mess) {
 }
 void Logger::write() {
 	std::unique_lock<std::mutex> que_mutex_lock(que_mutex);
+	std::ofstream fs(logfile_,std::fstream::out|std::fstream::app);
 	while(!mess_list.empty()) {
 		std::string& mess=mess_list.front();
 		if(logfile_.length() ) {
-			std::ofstream fs(logfile_);
 			fs<<mess;
 		}else std::cerr<<mess;
 		mess_list.pop();
