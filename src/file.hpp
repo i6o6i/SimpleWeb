@@ -1,5 +1,5 @@
-#ifndef HTTP_FILE_HPP
-#define HTTP_FILE_HPP
+#ifndef FILE_HPP
+#define FILE_HPP
 
 #include <ios>
 
@@ -13,7 +13,7 @@
 
 class file {
 	int fd_;
-	uint64_t fsize;
+	int64_t fsize;
 	char* fileaddr_;
 	void openfile(const char* path, std::ios_base::openmode m);
 public:
@@ -26,7 +26,7 @@ public:
 	file & operator=(file&& file);
 	~file();
 	int close();
-	std::size_t size() const;
+	int64_t size() const;
 	char* fileaddr() const{ return fileaddr_; }
 	int fd() const;
 	void invalid() { fd_ = -1; }

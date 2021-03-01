@@ -7,7 +7,7 @@
 #include <http/parser.hpp>
 
 namespace http {
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 class parser;
 
 enum class parser_ec {
@@ -17,9 +17,9 @@ enum class parser_ec {
 	invalid_header
 };
 
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 typename std::enable_if<isRequest,parser_ec>::type
-read_header_line(std::istream &is, parser<isRequest, Body, Fields>& par)
+read_header_line(std::istream &is, parser<isRequest, BodyHandler, Fields>& par)
 {
 	enum {
 		s_start,
@@ -228,9 +228,9 @@ read_header_line(std::istream &is, parser<isRequest, Body, Fields>& par)
 	return parser_ec::ok;
 }
 
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 typename std::enable_if<isRequest,parser_ec>::type
-read_header(std::istream &is, parser<isRequest, Body, Fields>& par)
+read_header(std::istream &is, parser<isRequest, BodyHandler, Fields>& par)
 {
 	enum {
 		s_start,
@@ -349,21 +349,21 @@ read_header(std::istream &is, parser<isRequest, Body, Fields>& par)
 	return parser_ec::ok;
 }
 
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 typename std::enable_if<isRequest,int>::type
-read_body(std::istream &is, parser<isRequest, Body, Fields>& par) {
+read_body(std::istream &is, parser<isRequest, BodyHandler, Fields>& par) {
 	if(!par.querystr_ptr.get()) {
-		Body::read(is,par.message_);
+		BodyHandler::read(is,par.message_);
 	}
 	else {
 		std::stringstream ss(*par.querystr_ptr);
-		Body::read(ss,par.message_);
+		BodyHandler::read(ss,par.message_);
 	}
 	return 0;
 }
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 typename std::enable_if<isRequest,int>::type
-read(std::istream &is, parser<isRequest, Body, Fields>& par)
+read(std::istream &is, parser<isRequest, BodyHandler, Fields>& par)
 {
 	parser_ec _ec = read_header(is,par);
 	if(_ec != parser_ec::ok)

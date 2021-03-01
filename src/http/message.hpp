@@ -124,13 +124,14 @@ public:
 	message(header_type &&h, BodyArgs&&... body_args)
 	:header_type(h), Body(std::forward<BodyArgs>(body_args)...){
 	}
+	
 	/*
 	template<class... BodyArgs>
-	message(header_type &h, BodyArgs &... body_args)
-	//std::forward will remove const
-	:header_type(h), Body(std::forward<BodyArgs>(body_args)...){
+	message(header_type &h, BodyArgs ... body_args)
+	:header_type(h), Body(body_args...){
 	}
 	*/
+	
 	//constructor for other body message
 	template<class OtherBody, class... BodyArgs>
 	message(message<isRequest, OtherBody> && m, BodyArgs &&... body_args)

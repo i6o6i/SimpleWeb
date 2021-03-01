@@ -4,16 +4,16 @@
 #include <type_traits>
 
 namespace http {
-template<bool isRequest, class Body, class Fields>
+template<bool isRequest, class BodyHandler, class Fields>
 class serializer;
 
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 typename std::enable_if<isRequest,uint64_t>::type
 //uint64_t
-write_header(std::ostream &os, serializer<isRequest, Body, Fields>& sr)
+write_header(std::ostream &os, serializer<isRequest, BodyHandler, Fields>& sr)
 {
 	std::size_t bytes = 0;
-	message<true,Body,Fields> & m = sr.message_;
+	message<true,typename BodyHandler::value_type,Fields> & m = sr.message_;
 	os<<m.method_string()+" "+m.target()+" "+m.version_string()<<"\r\n";
 	bytes +=m.method_string().length()
 		+ m.target().length()
@@ -22,13 +22,13 @@ write_header(std::ostream &os, serializer<isRequest, Body, Fields>& sr)
 	sr.header_done_ = true;
 	return bytes;
 }
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 typename std::enable_if<!isRequest,uint64_t>::type
 //uint64_t
-write_header(std::ostream &os, serializer<isRequest, Body, Fields>& sr)
+write_header(std::ostream &os, serializer<isRequest, BodyHandler, Fields>& sr)
 {
 	std::size_t bytes = 0;
-	message<false,Body,Fields> & m = sr.message_;
+	message<false,typename BodyHandler::value_type,Fields> & m = sr.message_;
 	os<<m.version_string()+" "+m.reason()<<"\r\n";
 	bytes +=m.version_string().length()
 		+ m.reason().length() + 3;
@@ -38,13 +38,13 @@ write_header(std::ostream &os, serializer<isRequest, Body, Fields>& sr)
 	sr.header_done_ = true;
 	return bytes;
 }
-template<bool isRequest,class Body, class Fields >
+template<bool isRequest,class BodyHandler, class Fields >
 uint64_t
-write(std::ostream &os, serializer<isRequest, Body, Fields>& sr)
+write(std::ostream &os, serializer<isRequest, BodyHandler, Fields>& sr)
 {
 	uint64_t bytes = 0;
 	bytes+=write_header<isRequest>(os,sr);
-	bytes+=Body::write(os,sr.message_);
+	bytes+=BodyHandler::write(os,sr.message_);
 	sr.done_ =true;
 	return bytes;
 };

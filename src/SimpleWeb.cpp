@@ -88,15 +88,11 @@ void SimpleWeb::run(){
 				if(errno == EWOULDBLOCK) {
 					break;
 				}else if(errno == ETOOMANYREFS ){
-#ifdef DEBUG
 					std::cerr<<"ETOOMANYREFS\n";
-#endif
 					continue;
 				}else {
-#ifdef DEBUG
-					std::cerr<<"accept "<<connfd<<" failed\n";
-					std::cerr<<::strerror(errno)<<'\n';
-#endif
+					//std::cerr<<"accept "<<connfd<<" failed\n";
+					//std::cerr<<::strerror(errno)<<'\n';
 					break;
 				}
 			}

@@ -31,9 +31,7 @@ void file::openfile(const char* path, std::ios_base::openmode m) {
 	}
 
 	fd_ = open(path,flag);
-#ifdef DEBUG
 	std::cerr<<"open file: "<<path<<" fd:"<<fd_<<std::endl;
-#endif
 	if( fd_ < 0 ) {
 		std::cerr<<::strerror(errno);
 	}
@@ -65,7 +63,7 @@ file::~file() {
 	}
 }
 
-uint64_t file::size() const{
+int64_t file::size() const{
 	return fsize;
 }
 int file::fd() const{

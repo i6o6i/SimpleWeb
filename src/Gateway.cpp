@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <Logger.hpp>
+#include <http/shared_file_body.hpp>
 
 namespace simpleweb{
 
@@ -52,7 +53,7 @@ void host::serve(
 	) 
 {
 	using namespace http;
-	request_message<empty_body>& req_m=par.get();
+	request_message<empty_base>& req_m=par.get();
 	time_t rawtime;
 	::time(&rawtime);
 	char timestr[30];
@@ -71,8 +72,9 @@ void host::serve(
 		req_m.target("/index.html");
 	}
 	if(isDynamic(par)) {
-		using reqs_body = vector_body<reqargs>;
-		request_parser<reqs_body> par_(std::move(par));
+		//using reqs_body = vector_body<reqargs>;
+
+		request_parser<vector_body<reqargs>> par_(std::move(par));
 		read_body(conn,par_);
 		dynamicapps[req_m.target()].response(conn,res_h);
 	} else {
@@ -82,38 +84,29 @@ void host::serve(
 			res_h.result(status::ok);
 
 			unsigned int hash =0;
-			for(int i=filepath.size()-1;i&&filepath[i]!='.';i--) {
+			for(int i=filepath.size()-1;i&&filepath[i]!='.';i--) 
 				hash = hash*7+filepath[i];
-			}
-#ifdef DEBUG
-			std::cerr<<filepath<<"content-type hash"<<hash<<'\n';
-#endif
+
 			res_h["Content-type"] = getcontent_type(hash);
 			res_h["Connection"] = "keep-alive";
+			fileNode filenode;
 			if(filecaches_.get(filepath) != filecaches_.end()) {
-				fileNode &f = *filecaches_.get(filepath);
 #ifdef DEBUG
-				//std::cerr<<"caches hit filename "<<f.name<<'\n';
+				std::cerr<<"caches hit filename "<<filenode.name<<'\n';
 #endif
-				response_serializer<file_body> res_ser({std::move(res_h), f.fd, f.name.c_str()});
-				response_message<file_body>& res_m = res_ser.get();
-				res_m["Content-Length"] = std::to_string(file_body::size(res_m));
-				write(conn,res_ser);
-				res_m.content().invalid();
+				filenode = *filecaches_.get(filepath);
 			} else {
 #ifdef DEBUG
 				std::cerr<<"caches missed filename "<<filepath<<'\n';
-#endif
-				response_serializer<file_body> res_ser({std::move(res_h), filepath});
-#ifdef DEBUG
 				std::cerr<<"set caches for file "<<filepath<<'\n';
 #endif
-				response_message<file_body>& res_m = res_ser.get();
-				filecaches_.set(filepath,res_m.content().fd());
-				res_m["Content-Length"] = std::to_string(file_body::size(res_m));
-				write(conn,res_ser);
-				res_m.content().invalid();
+				filenode = filecaches_.set(filepath);
 			}
+			//shared_file_body file_body = { filenode.fptr };
+			response_serializer<shared_file_body> res_ser({std::move(res_h), filenode.fptr});
+			response_message<std::shared_ptr<file>>& res_m = res_ser.get();
+			res_m["Content-Length"] = std::to_string(shared_file_body::size(res_m));
+			write(conn,res_ser);
 			//defaultapp.response(conn,res_h,pagefile);
 		} else {
 			res_h["Content-type"]="text/plain; charset=UTF-8";
@@ -122,8 +115,9 @@ void host::serve(
 				case EACCES: res_h.result(status::forbidden);break;
 				case ENOENT: res_h.result(status::not_found);break;
 			}
+			std::string resultstring = res_h.reason();
 			response_serializer<string_body> res_ser{
-				{ std::move(res_h), res_h.reason()}
+				{ std::move(res_h), resultstring}
 			};
 			write(conn,res_ser);
 		}
@@ -150,16 +144,14 @@ Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
 #endif
 		fdstream conn(e.data.fd);
 		if(conn.peek() == EOF) {
-#ifdef DEBUG
 			//std::cerr<<"connection return 0 bytes, remove and close\n";
-#endif
 			reactor.remove_event(e.data.fd);
 			::close(e.data.fd);
 			return ;
 		}
 		request_parser<empty_body> req_par{};
 		read_header(conn,req_par);
-		request_message<empty_body> &req_m = req_par.get();
+		request_message<empty_base> &req_m = req_par.get();
 
 		std::ostringstream oss;
 		oss<<::inet_ntoa(fd_ip_map_[e.data.fd])<<' ';

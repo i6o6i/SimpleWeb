@@ -8,9 +8,9 @@
 
 namespace http{
 
-template<bool isRequest,class Body,class Fields>
+template<bool isRequest,class BodyHandler,class Fields>
 class parser{
-	using message_type = message<isRequest, Body, Fields>;
+	using message_type = message<isRequest, typename BodyHandler::value_type, Fields>;
 	message_type message_;
 	std::unique_ptr<std::string> querystr_ptr;
 	bool header_done_;
@@ -18,9 +18,9 @@ class parser{
 	parser_ec ec_;
 public:
 	parser(): message_(), querystr_ptr(nullptr), done_(false),header_done_(false),ec_(parser_ec::ok) {}
-	template<class Emptybody>
-	parser( parser<isRequest, Emptybody, Fields> && par)
-	: message_(std::move(par.get())), 
+	template<class Emptybody, class... BodyArgs>
+	parser( parser<isRequest, Emptybody, Fields> && par, BodyArgs &&... body_args)
+	: message_(std::move(par.get()), std::forward<BodyArgs>(body_args)...), 
 	querystr_ptr(std::move(par.querystr())),
 	header_done_(par.is_header_done()),
 	done_(par.is_done()), 
@@ -31,20 +31,20 @@ public:
 	bool is_done() { return done_; }
 	parser_ec ec() { return ec_; }
 	friend parser_ec
-	read_header_line<>(std::istream &is, parser<isRequest, Body, Fields>& par);
+	read_header_line<>(std::istream &is, parser<isRequest, BodyHandler, Fields>& par);
 	friend parser_ec
-	read_header<>(std::istream &is, parser<isRequest, Body, Fields>& par);
+	read_header<>(std::istream &is, parser<isRequest, BodyHandler, Fields>& par);
 	friend int
-	read_body<>(std::istream &is, parser<isRequest, Body, Fields>& par);
+	read_body<>(std::istream &is, parser<isRequest, BodyHandler, Fields>& par);
 	friend int
-	read<>(std::istream &is, parser<isRequest, Body, Fields>& par);
+	read<>(std::istream &is, parser<isRequest, BodyHandler, Fields>& par);
 };
 
-template<class Body , class Fields = fields>
-using request_parser = parser<true, Body, Fields>;
+template<class BodyHandler , class Fields = fields>
+using request_parser = parser<true, BodyHandler, Fields>;
 
-template<class Body , class Fields = fields>
-using response_parser = parser<false, Body, Fields>;
+template<class BodyHandler , class Fields = fields>
+using response_parser = parser<false, BodyHandler, Fields>;
 
 }
 #endif

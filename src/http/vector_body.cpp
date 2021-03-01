@@ -5,11 +5,11 @@
 namespace http{
 
 template<>
-uint64_t vector_body<reqargs>::size() {
+uint64_t vector_body<reqargs>::size(const value_type& vb) {
 	uint64_t size_;
 	if(size_ < 0) {
 		size_ = 0;
-		for(auto i:content_) {
+		for(auto i:vb) {
 			size_+=i.key.size()+i.value.size();
 		}
 	}
@@ -17,7 +17,7 @@ uint64_t vector_body<reqargs>::size() {
 }
 
 template<>
-int64_t vector_body<reqargs>::read(std::istream& is, vector_body<reqargs>& body_handler) {
+int64_t vector_body<reqargs>::read(std::istream& is, std::vector<reqargs>& body) {
 	int64_t totalsize=0;
 	char name[MAXFIELDNAME];
 	char value[MAXFIELDVALUE];
@@ -47,7 +47,7 @@ int64_t vector_body<reqargs>::read(std::istream& is, vector_body<reqargs>& body_
 						break;
 					case '&':
 						name[i] ='\0';
-						body_handler.content_.push_back({
+						body.push_back({
 								std::move(std::string(name)),
 								std::move(std::string())
 							});
@@ -65,7 +65,7 @@ int64_t vector_body<reqargs>::read(std::istream& is, vector_body<reqargs>& body_
 				switch(ch) {
 					case '&':
 						value[i]='\0';
-						body_handler.content_.push_back({
+						body.push_back({
 								std::move(std::string(name)),
 								std::move(std::string(value))
 							});
@@ -75,14 +75,14 @@ int64_t vector_body<reqargs>::read(std::istream& is, vector_body<reqargs>& body_
 					//case space for GET
 					case ' ':
 						value[i]='\0';
-						body_handler.content_.push_back({
+						body.push_back({
 								std::move(std::string(name)),
 								std::move(std::string(value))
 							});
 						return totalsize;
 					case CR:
 						value[i]='\0';
-						body_handler.content_.push_back({
+						body.push_back({
 								std::move(std::string(name)),
 								std::move(std::string(value))
 							});
@@ -90,7 +90,7 @@ int64_t vector_body<reqargs>::read(std::istream& is, vector_body<reqargs>& body_
 						break;
 					case LF:
 						value[i]='\0';
-						body_handler.content_.push_back({
+						body.push_back({
 								std::move(std::string(name)),
 								std::move(std::string(value))
 							});
@@ -109,11 +109,11 @@ int64_t vector_body<reqargs>::read(std::istream& is, vector_body<reqargs>& body_
 	return totalsize;
 }
 template<>
-int64_t vector_body<reqargs>::write(std::ostream& os, vector_body<reqargs> const& vb) {
-	if(vb.content_.size())
-		os<<vb.content_[0].key<<'='<<vb.content_[0].value;
-	for(int i=1;i<vb.content_.size();i++) {
-		os<<'&'<<vb.content_[i].key<<'='<<vb.content_[i].value;
+int64_t vector_body<reqargs>::write(std::ostream& os, std::vector<reqargs> const& body) {
+	if(body.size())
+		os<<body[0].key<<'='<<body[0].value;
+	for(int i=1;i<body.size();i++) {
+		os<<'&'<<body[i].key<<'='<<body[i].value;
 	}
 	return 0;
 }
