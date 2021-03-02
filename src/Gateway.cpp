@@ -152,6 +152,10 @@ Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
 		request_parser<empty_body> req_par{};
 		read_header(conn,req_par);
 		request_message<empty_base> &req_m = req_par.get();
+		if(!req_par.is_header_done()) {
+			::shutdown(e.data.fd,SHUT_RDWR);
+			return ;
+		}
 
 		std::ostringstream oss;
 		oss<<::inet_ntoa(fd_ip_map_[e.data.fd])<<' ';
