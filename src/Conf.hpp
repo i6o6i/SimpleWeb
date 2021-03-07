@@ -17,7 +17,7 @@ class Conf{
 		static level loglevel_;
 		std::string logfilename_;
 		std::vector<hostinfo> hosts_;
-		hostinfo defauthost_;
+		hostinfo defaulthost_;
 		int threadcnt_;
 		int filecachesnum_;
 		int global_parser(std::istream& is);
@@ -32,7 +32,7 @@ class Conf{
 		int threadcnt() {return threadcnt_;};
 		int filecachesnum() {return filecachesnum_; }
 		const std::string& logfilename() {return logfilename_;}
-		const hostinfo& defauthost() {return defauthost_;}
+		const hostinfo& defaulthost() {return defaulthost_;}
 		const std::vector<hostinfo>& hosts() {return hosts_;}
 		static level loglevel() {return loglevel_;}
 		static std::string ServerVersion() { return "SimpleWeb/0.1"; }

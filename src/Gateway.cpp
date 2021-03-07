@@ -132,7 +132,7 @@ bool host::isDynamic(http::request_parser<http::empty_body>& par) {
 		|| par.get().method()== http::verb::get && par.querystr();
 }
 Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
-	:defaultHost(conf.defauthost(),conf.filecachesnum())
+	:defaultHost(conf.defaulthost(),conf.filecachesnum())
 {
 	using namespace http;
 	for(auto& h: conf.hosts()) {
@@ -160,9 +160,15 @@ Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
 		std::ostringstream oss;
 		oss<<::inet_ntoa(fd_ip_map_[e.data.fd])<<' ';
 		//Logger::logfor(Info, ::inet_ntoa(fd_ip_map_[e.data.fd]), ' ');
-		if(Hosts.find(req_m["host"]) == Hosts.end())
+		if(req_m["Host"] == conf.defaulthost().servername)
 			defaultHost.serve(oss,conn,req_par);
-		else Hosts[req_m["host"]].serve(oss,conn,req_par);
+		else if(Hosts.find(req_m["Host"]) == Hosts.end()){
+			Hosts[req_m["Host"]].serve(oss,conn,req_par);
+		}else {
+			::shutdown(e.data.fd,SHUT_RDWR);
+			oss<<"host not found\n";
+			return ;
+		}
 		//::shutdown(e.data.fd,SHUT_RD);
 		if(Conf::loglevel() >= Info)
 			logger.log(oss.str());

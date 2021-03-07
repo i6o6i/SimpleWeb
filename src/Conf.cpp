@@ -23,7 +23,7 @@ Conf::Conf() {
 	ip_ = "127.0.0.1";
 	port_ = 8080;
 	threadcnt_ = 4;
-	defauthost_ = { "", "." };
+	defaulthost_ = { "", "." };
 	logfilename_ = "";
 	filecachesnum_ = 32;
 }
@@ -84,9 +84,10 @@ int Conf::global_parser(std::istream& is)
 						}
 					}
 					if( key == "docroot" ) {
-						if( ::access(value.c_str(),R_OK) == 0 )
-							defauthost_.docroot = line.substr(i+1);
-						else {
+						if( ::access(value.c_str(),R_OK) == 0 ) {
+							defaulthost_.docroot = line.substr(i+1);
+							Logger::logfor(Debug, "set default docroot to ", defaulthost_.docroot, '\n');
+						} else {
 							Logger::logfor(Info, ::strerror(errno));
 							return -1;
 						}
@@ -100,6 +101,12 @@ int Conf::global_parser(std::istream& is)
 					if(key == "cachesnum") {
 						filecachesnum_ = stoi(value);
 						Logger::logfor(Debug, "boost with ", threadcnt_," filecaches\n");
+					}
+					break;
+				case 11:
+					if( key == "defaulthost" ) {
+						defaulthost_.servername= value;
+						Logger::logfor(Debug, "set default host to ", defaulthost_.servername, '\n');
 					}
 					break;
 			}
