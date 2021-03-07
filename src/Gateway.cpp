@@ -164,6 +164,8 @@ Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
 					req_m.has("X-Forwarded-Host")?
 						req_m["X-Forwarded-Host"]:req_m["Host"]:
 					"";
+		auto i= host.find(':');
+		if(i != std::string::npos) host = host.substr(0,i);
 		if(host == conf.defaulthost().servername)
 			defaultHost.serve(oss,conn,req_par);
 		else if(Hosts.find(host) == Hosts.end()){
