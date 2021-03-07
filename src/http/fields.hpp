@@ -16,6 +16,9 @@ public:
 	std::string &operator[](const std::string & key){
 		return fields_[key];
 	}
+	bool has(const std::string& key) {
+		return fields_.find(key) != fields_.end();
+	}
 	fields() = default;
 	/*
 	friend std::size_t read(std::istream &is, fields & f){

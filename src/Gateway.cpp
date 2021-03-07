@@ -160,9 +160,13 @@ Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
 		std::ostringstream oss;
 		oss<<::inet_ntoa(fd_ip_map_[e.data.fd])<<' ';
 		//Logger::logfor(Info, ::inet_ntoa(fd_ip_map_[e.data.fd]), ' ');
-		if(req_m["Host"] == conf.defaulthost().servername)
+		std::string host = req_m.has("Host")?
+					req_m.has("X-Forwarded-Host")?
+						req_m["X-Forwarded-Host"]:req_m["Host"]:
+					"";
+		if(host == conf.defaulthost().servername)
 			defaultHost.serve(oss,conn,req_par);
-		else if(Hosts.find(req_m["Host"]) == Hosts.end()){
+		else if(Hosts.find(host) == Hosts.end()){
 			Hosts[req_m["Host"]].serve(oss,conn,req_par);
 		}else {
 			::shutdown(e.data.fd,SHUT_RDWR);
