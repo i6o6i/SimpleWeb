@@ -8,6 +8,8 @@ function linkfile {
     [[ -f ../1M.txt ]] && ln -s ../1M.txt
     [[ -f ../index.html ]] && ln -s ../index.html
     [[ -f ../sw.conf ]] && ln -s ../sw.conf
+    [[ -f ../benchmark/ ]] && ln -s ../benchmark
+    [[ -f ../ahost/ ]] && ln -s ../ahost
 }
 case $1 in 
     'build')

@@ -8,6 +8,7 @@
 #include <http/message.hpp>
 #include <http/parser.hpp>
 #include <http/empty_body.hpp>
+#include <http/vector_body.hpp>
 #include <arpa/inet.h>
 #include <Logger.hpp>
 #include <filecaches.hpp>
@@ -34,7 +35,17 @@ public:
 
 class host{
 	hostinfo info_;
-	std::map<std::string,application> dynamicapps;
+	//std::map<std::string,application> dynamicapps;
+	std::map<std::string, 
+		void(*)(
+			http::request_message<std::vector<http::reqargs>>& req,
+			http::response_message<std::string>& res
+			   )> getservices;
+	std::map<std::string, 
+		void(*)(
+			http::request_message<std::vector<http::reqargs>>& req,
+			http::response_message<std::string>& res
+			   )> postservices;
 	filecaches filecaches_;
 	int access(const std::string& path);
 public:

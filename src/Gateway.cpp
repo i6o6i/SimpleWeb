@@ -1,3 +1,4 @@
+#include <dlfcn.h>
 #include <Gateway.hpp>
 #include <http/message.hpp>
 #include <http/parser.hpp>
@@ -65,22 +66,78 @@ void host::serve(
 			{"Server",Conf::ServerVersion()},
 		},
 		10
-	);
+		);
 	::strftime(timestr,30,"%a, %d %b %Y %T GMT", gmtime(&rawtime));
 	//404 and 401
 	if(req_m.target()=="/") {
 		req_m.target("/index.html");
 	}
-	if(isDynamic(par)) {
-		//using reqs_body = vector_body<reqargs>;
+	std::string &&filepath =info_.docroot+req_m.target() ;
+	int ec ;
+	bool isdynamic = isDynamic(par);
 
-		request_parser<vector_body<reqargs>> par_(std::move(par));
-		read_body(conn,par_);
-		dynamicapps[req_m.target()].response(conn,res_h);
-	} else {
-		std::string &&filepath =info_.docroot+req_m.target() ;
-		int ec = access(filepath);
-		if(ec == 0) {
+	if(isdynamic) {
+		filepath +=".so";
+		ec = access(filepath);
+	}else {
+		ec = access(filepath);
+	}
+	if(ec == 0) {
+		if(isdynamic) {
+			if(getservices.find(req_m.target())==getservices.end()&&
+			   postservices.find(req_m.target())== postservices.end()) {
+				void *handler = dlopen(filepath.c_str(),RTLD_NOW);
+				if(!handler) {
+					std::cerr<<dlerror()<<'\n';
+					return;
+				}
+				void (*fptr)(request_message<std::vector<reqargs>>&, response_message<std::string>&);
+				*(void **)(&fptr) =dlsym(handler, "get");
+				if(!fptr) {
+					std::cerr<<dlerror()<<'\n';
+				}else getservices[req_m.target()] = fptr;
+				*(void **)(&fptr) =dlsym(handler, "post");
+				if(!fptr) {
+					std::cerr<<dlerror()<<'\n';
+				}else postservices[req_m.target()] = fptr;
+			}
+			request_parser<vector_body<reqargs>> args_par(std::move(par));
+			read_body(conn,args_par);
+
+			response_serializer<string_body> res_ser{
+				std::move(res_h)
+			};
+			response_message<std::string>& res_m=res_ser.get();
+			switch(req_m.method()) {
+				case verb::get: 
+					if(getservices.find(req_m.target())!=getservices.end()) {
+						res_m.result(status::ok);
+						getservices[req_m.target()](args_par.get(),res_m); 
+					} else {
+						res_m.result(status::bad_request);
+						res_m.append(res_m.reason());
+					}
+					break;
+				case verb::post: 
+					if(postservices.find(req_m.target())!=postservices.end()) {
+						res_m.result(status::ok);
+						postservices[req_m.target()](args_par.get(),res_m); 
+					} else {
+						res_m.append(to_string(status::bad_request));
+						res_m.append(res_m.reason());
+					}
+					break;
+				default: 
+					res_m.result(status::bad_request);
+					res_m.append(to_string(status::bad_request));
+					break;
+			}
+
+			static_cast<fields&>(res_m)["Content-Length"] = std::to_string(res_m.size());
+			write(conn,res_ser);
+			//dynamicapps[req_m.target()].response(conn,res_h);
+		}else {
+
 			res_h.result(status::ok);
 
 			unsigned int hash =0;
@@ -108,20 +165,20 @@ void host::serve(
 			res_m["Content-Length"] = std::to_string(shared_file_body::size(res_m));
 			write(conn,res_ser);
 			//defaultapp.response(conn,res_h,pagefile);
-		} else {
-			res_h["Content-type"]="text/plain; charset=UTF-8";
-			//{"Content-Length",std::to_string(file_body::size(fb.body())) },
-			switch(ec) {
-				case EACCES: res_h.result(status::forbidden);break;
-				case ENOENT: res_h.result(status::not_found);break;
-			}
-			std::string resultstring = res_h.reason();
-			response_serializer<string_body> res_ser{
-				{ std::move(res_h), resultstring}
-			};
-			write(conn,res_ser);
 		}
-	} 
+	} else {
+		res_h["Content-type"]="text/plain; charset=UTF-8";
+		//{"Content-Length",std::to_string(file_body::size(fb.body())) },
+		switch(ec) {
+			case EACCES: res_h.result(status::forbidden);break;
+			case ENOENT: res_h.result(status::not_found);break;
+		}
+		std::string resultstring = res_h.reason();
+		response_serializer<string_body> res_ser{
+			{ std::move(res_h), resultstring}
+		};
+		write(conn,res_ser);
+	}
 	char logtime[23];
 	std::strftime(logtime,23,"[%d/%b/%Y:%T]", std::localtime(&rawtime));
 	if(Conf::loglevel() >= Info)
@@ -164,12 +221,10 @@ Gateway::Gateway(Reactor& reactor, Logger& logger, Conf& conf)
 					req_m.has("X-Forwarded-Host")?
 						req_m["X-Forwarded-Host"]:req_m["Host"]:
 					"";
-		auto i= host.find(':');
-		if(i != std::string::npos) host = host.substr(0,i);
 		if(host == conf.defaulthost().servername)
 			defaultHost.serve(oss,conn,req_par);
-		else if(Hosts.find(host) == Hosts.end()){
-			Hosts[req_m["Host"]].serve(oss,conn,req_par);
+		else if(Hosts.find(host) != Hosts.end()){
+			Hosts[host].serve(oss,conn,req_par);
 		}else {
 			::shutdown(e.data.fd,SHUT_RDWR);
 			oss<<"host not found\n";

@@ -19,8 +19,16 @@ file(GLOB_RECURSE TEST_SOURCE test/sw.cpp )
 foreach( testsourcefile ${TEST_SOURCE} )
     string( REGEX REPLACE ".*/\(.*\).cpp" "\\1" testname ${testsourcefile} )
     add_executable( ${testname} ${testsourcefile} ${RUN_SRCS})
-    target_link_libraries( ${testname} PRIVATE Threads::Threads)
+    target_link_libraries( ${testname} PRIVATE Threads::Threads dl)
 endforeach( testsourcefile ${TEST_SOURCE} )
+
+file(GLOB_RECURSE DLLIB_SOURCE dllib/*.cpp )
+foreach( testsourcefile ${DLLIB_SOURCE} )
+    string( REGEX REPLACE ".*/\(.*\).cpp" "\\1" testname ${testsourcefile} )
+    add_library( ${testname} SHARED ${testsourcefile} ${RUN_SRCS})
+    target_link_libraries( ${testname} PRIVATE maxminddb)
+    set_target_properties(${testname} PROPERTIES PREFIX "")
+endforeach( testsourcefile ${DLLIB_SOURCE} )
 
 
 

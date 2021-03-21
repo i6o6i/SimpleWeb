@@ -120,7 +120,6 @@ int Conf::host_parser(std::istream& is) {
 	Logger::logfor(Debug, "Read host conf\n");
 	hostinfo host;
 	while(is.good()&&is.peek() != '['&&getline(is,line)) {
-		getline(is,line);
 		int i=0;
 		while(i<line.length() && line[i] != '=') {
 			i++;
